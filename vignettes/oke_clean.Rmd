@@ -1,0 +1,160 @@
+---
+title: "Project OK Clean"
+author: "Asniar"
+date: "5/24/2019"
+output:
+  github_document
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Master
+
+```{r}
+
+```
+
+## Aktifkan Library
+
+```{r}
+library(readr)
+library(rpart)
+library(rattle)
+library(rpart.plot) #Library untuk plot dan nampilin grafik
+library(RColorBrewer)
+
+```
+
+
+
+## Import data
+
+```{r}
+pengguna <- read_csv("../data-raw/001_ok-clean_pengguna.csv")
+pengguna
+komplain <- read_csv("../data-raw/001_ok-clean_komplain.csv")
+komplain
+keuntungan <- read_csv("../data-raw/001_ok-clean_keuntungan.csv")
+keuntungan
+```
+
+### Creating Linear Regression Model
+Dalam praktek kali ini kita akan membuat model regresi linear untuk memprediksi jumlah pengguna, jumlah komplain dan jumlah keuntungan berdasarkan waktu hari promosi.
+
+```{r}
+# Membuat model 
+# lm([target attribute] ~ [predictor attributes], data = [data source])
+set.seed(1234)
+linearmodel_pengguna = lm(jumlah_pengguna ~ hari_promosi,
+               data = pengguna)
+linearmodel_komplain = lm(jumlah_komplain ~ hari_promosi,
+               data = komplain)
+linearmodel_keuntungan = lm(jumlah_keuntungan ~ hari_promosi,
+               data = keuntungan)
+
+#Melihat model yang dibuat. 
+linearmodel_pengguna
+linearmodel_komplain
+linearmodel_keuntungan
+
+#melihat summary model yang dibuat. 
+summary(linearmodel_pengguna)
+summary(linearmodel_komplain)
+summary(linearmodel_keuntungan)
+```
+
+Dari hasil diatas, kita dapat melihat bahwa persaman regresi linear dari model tersebut adalah : Jumlah Pengguna = 28.91 + (137.13xhari_promosi)
+
+```{r}
+# jumlah_pengguna = Intercept + (Slope*hari_promosi)
+# jumlah_komplain = Intercept + (Slope*hari_promosi)
+# jumlah_keuntungan = Intercept + (Slope*hari_promosi)
+```
+
+#### Residual
+Salah satu cara untuk menguji kualitas kesesuaian model regressi adalah dengan melihat nilai residual atau perbedaan antara nilai riil dan nilai prediksi. Model yang bagus memiliki nilai residu yang kecil (mendekati nol). 
+
+```{r}
+#Melihat nilai residual
+summary(linearmodel_pengguna$residuals)
+summary(linearmodel_komplain$residuals)
+summary(linearmodel_keuntungan$residuals)
+```
+
+### Diagnostic plot Visualization
+Di R, kita dapat memahami model melaui diagnostic plot:
+
+```{r}
+par(mfrow=c(2,2))
+plot(linearmodel_pengguna)
+plot(linearmodel_komplain)
+plot(linearmodel_keuntungan)
+```
+
+## Model Visualization
+```{r}
+#Memvisualisasikan Model Linear Regression
+plot(pengguna, pch = 16, col = "blue") 
+#abline(linearmodel_pengguna)
+plot(komplain, pch = 16, col = "red") 
+#abline(linearmodel_komplain)
+plot(keuntungan, pch = 16, col = "green") 
+#abline(linearmodel_keu)
+
+```
+
+## Prediksi Manajer Pemasaran di hari ke-130, 150, dan 200
+
+```{r}
+#prediksi_pengguna<- predict(linearmodel_pengguna,newdata = data.frame(hari_promosi = 130)) -->kalau 1 data, ga pake c
+
+prediksi_pengguna <- predict(linearmodel_pengguna,newdata = data.frame(hari_promosi = c(130, 150, 200)))
+prediksi_pengguna
+
+#pengguna_hari130 <- predict(linearmodel_pengguna,newdata = data.frame(hari_promosi = 130))
+#pengguna_hari150 <- predict(linearmodel_pengguna,newdata = data.frame(hari_promosi = 150))
+#pengguna_hari200 <- predict(linearmodel_pengguna,newdata = data.frame(hari_promosi = 200))
+
+#pengguna_hari130
+#pengguna_hari150
+#pengguna_hari200
+
+```
+
+## Prediksi Manajer Layanan Konsumen di hari ke-130, 150, dan 200
+
+```{r}
+
+prediksi_komplain <- predict(linearmodel_komplain,newdata = data.frame(hari_promosi = c(130, 150, 200)))
+prediksi_komplain
+
+#
+
+```
+
+## Prediksi Manajer Keuangan di hari ke-130, 150, dan 200
+
+```{r}
+
+prediksi_keuntungan <- predict(linearmodel_keuntungan,newdata = data.frame(hari_promosi = c(130, 150, 200)))
+prediksi_keuntungan
+
+#
+
+```
+
+## Prediksi Ketiga Manajer
+
+1. Adakah pola mencurigakan yang terjadi dalam data pada masing – masing arsip?
+  Ada
+
+2. Kapan pola tersebut tersebut mulai terjadi? Mulai hari ke-100
+3. Mengapa hal tersebut dapat terjadi? Karena ada ledakan komplain di mulai hari ke-100 yang membuat keuntungan menurun meskipun jumlah pelanggan naik.
+Promosi kinerjanya turun,
+4. Akankah temuan tersebut jika berlangsung secara terus – menerus dapat merugikan perusahaan? Iya
+5. Keputusan apa yang sebaiknya diambil oleh perusahaan? 
